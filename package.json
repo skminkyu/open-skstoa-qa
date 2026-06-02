@@ -9,7 +9,7 @@
     "lint": "eslint",
     "seed": "npx tsx scripts/seed-admin.ts",
     "postinstall": "prisma generate",
-    "start": "prisma migrate deploy && next start"
+    "start": "prisma migrate deploy && next start -p ${PORT:-3000}"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.8.0",
