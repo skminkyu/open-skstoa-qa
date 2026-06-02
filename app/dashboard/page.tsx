@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import LogoutButton from "@/components/LogoutButton";
+import DashboardTabs from "@/components/DashboardTabs";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -13,8 +14,11 @@ export default async function DashboardPage() {
     where: { id: session.userId },
     select: { companyName: true, status: true, shareUrl: true },
   });
-
   if (!user) redirect("/login");
+
+  const urls = user.shareUrl
+    ? user.shareUrl.split("\n").map((u) => u.trim()).filter(Boolean)
+    : [];
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#f8fafc" }}>
@@ -65,7 +69,7 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {user.status === "approved" && !user.shareUrl && (
+        {user.status === "approved" && urls.length === 0 && (
           <div className="bg-blue-50 border border-blue-200 rounded-2xl p-8 text-center">
             <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,15 +81,8 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {user.status === "approved" && user.shareUrl && (
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ height: "80vh" }}>
-            <iframe
-              src={user.shareUrl}
-              className="w-full h-full border-0"
-              title="QA 진척 현황"
-              allow="fullscreen"
-            />
-          </div>
+        {user.status === "approved" && urls.length > 0 && (
+          <DashboardTabs urls={urls} />
         )}
       </main>
     </div>

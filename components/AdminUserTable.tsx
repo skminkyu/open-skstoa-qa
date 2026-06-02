@@ -45,6 +45,11 @@ export default function AdminUserTable({ users, highlight }: Props) {
     setShareUrlInput(user.shareUrl || "");
   }
 
+  function getUrlCount(shareUrl: string | null) {
+    if (!shareUrl) return 0;
+    return shareUrl.split("\n").filter((u) => u.trim()).length;
+  }
+
   return (
     <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
       <table className="w-full text-sm">
@@ -68,19 +73,25 @@ export default function AdminUserTable({ users, highlight }: Props) {
               </td>
               <td className="px-4 py-3 text-gray-500 max-w-xs">
                 {editingId === user.id ? (
-                  <input
-                    type="url"
-                    value={shareUrlInput}
-                    onChange={(e) => setShareUrlInput(e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1"
-                    placeholder="https://..."
-                  />
+                  <div>
+                    <textarea
+                      value={shareUrlInput}
+                      onChange={(e) => setShareUrlInput(e.target.value)}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 resize-none"
+                      placeholder={"URL을 한 줄에 하나씩 입력\nhttps://...\nhttps://..."}
+                      rows={3}
+                    />
+                    <p className="text-xs text-gray-400 mt-1">한 줄에 URL 1개씩 입력</p>
+                  </div>
                 ) : (
-                  <span className="text-xs truncate block max-w-[200px]" title={user.shareUrl || ""}>
+                  <span className="text-xs">
                     {user.shareUrl ? (
-                      <a href={user.shareUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                        {user.shareUrl.length > 40 ? user.shareUrl.substring(0, 40) + "..." : user.shareUrl}
-                      </a>
+                      <span className="inline-flex items-center gap-1 text-blue-600">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                        URL {getUrlCount(user.shareUrl)}개 설정됨
+                      </span>
                     ) : (
                       <span className="text-gray-300">미설정</span>
                     )}
@@ -94,7 +105,7 @@ export default function AdminUserTable({ users, highlight }: Props) {
                 {editingId === user.id ? (
                   <div className="flex gap-2 justify-end">
                     <button
-                      onClick={() => handleAction(user.id, "approved", shareUrlInput || undefined)}
+                      onClick={() => handleAction(user.id, "approved", shareUrlInput.trim() || undefined)}
                       disabled={loading === user.id}
                       className="text-xs px-3 py-1.5 rounded-lg text-white font-medium disabled:opacity-60"
                       style={{ backgroundColor: "#22c55e" }}
