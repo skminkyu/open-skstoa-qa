@@ -4,7 +4,8 @@ import bcrypt from "bcryptjs";
 import path from "path";
 import "dotenv/config";
 
-const dbPath = path.resolve(process.cwd(), "dev.db");
+const dbUrl = process.env.DATABASE_URL ?? `file:${path.resolve(process.cwd(), "dev.db")}`;
+const dbPath = dbUrl.replace(/^file:/, "");
 const adapter = new PrismaBetterSqlite3({ url: dbPath });
 const prisma = new PrismaClient({ adapter });
 
