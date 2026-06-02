@@ -2,8 +2,15 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
-// One-time seed endpoint to create admin account
 export async function POST() {
+  return seed();
+}
+
+export async function GET() {
+  return seed();
+}
+
+async function seed() {
   const adminEmail = process.env.ADMIN_EMAIL || "admin@sk-stoa.com";
   const adminPassword = process.env.ADMIN_PASSWORD || "admin1234!";
 
