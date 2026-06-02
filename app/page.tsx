@@ -176,7 +176,7 @@ export default async function Home() {
 
       {/* Footer */}
       <footer className="bg-gray-800 text-gray-400 text-sm py-6 px-4 text-center">
-        <p>© 2025 SK스토아 QA팀. All rights reserved.</p>
+        <p>© 2026 SK스토아 품질관리팀. All rights reserved.</p>
       </footer>
     </div>
   );
