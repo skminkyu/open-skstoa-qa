@@ -20,8 +20,30 @@ interface Props {
 export default function AdminUserTable({ users, highlight }: Props) {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingCompany, setEditingCompany] = useState<string>("");
   const [shareUrlInput, setShareUrlInput] = useState("");
   const [loading, setLoading] = useState<string | null>(null);
+  const [autoLoading, setAutoLoading] = useState(false);
+
+  async function autoFetchUrls() {
+    if (!editingCompany) return;
+    setAutoLoading(true);
+    try {
+      const base = process.env.NEXT_PUBLIC_QA_CHECK_URL || "";
+      const res = await fetch(`${base}/api/public/shares?company=${encodeURIComponent(editingCompany)}`);
+      if (!res.ok) throw new Error("failed");
+      const data: { shareUrl: string; productName: string }[] = await res.json();
+      if (data.length === 0) {
+        alert("해당 협력사의 공유 URL이 없습니다. qa-check에서 공유 링크를 먼저 생성해주세요.");
+        return;
+      }
+      setShareUrlInput(data.map((d) => d.shareUrl).join("\n"));
+    } catch {
+      alert("자동 가져오기 실패. QA_CHECK_URL 환경변수를 확인해주세요.");
+    } finally {
+      setAutoLoading(false);
+    }
+  }
 
   async function handleAction(id: string, status: string, shareUrl?: string) {
     setLoading(id);
@@ -42,6 +64,7 @@ export default function AdminUserTable({ users, highlight }: Props) {
 
   function startApprove(user: User) {
     setEditingId(user.id);
+    setEditingCompany(user.companyName);
     setShareUrlInput(user.shareUrl || "");
   }
 
@@ -81,7 +104,17 @@ export default function AdminUserTable({ users, highlight }: Props) {
                       placeholder={"URL을 한 줄에 하나씩 입력\nhttps://...\nhttps://..."}
                       rows={3}
                     />
-                    <p className="text-xs text-gray-400 mt-1">한 줄에 URL 1개씩 입력</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-xs text-gray-400">한 줄에 URL 1개씩 입력</p>
+                      <button
+                        type="button"
+                        onClick={autoFetchUrls}
+                        disabled={autoLoading}
+                        className="text-xs px-2 py-1 rounded-md border border-blue-200 text-blue-600 hover:bg-blue-50 disabled:opacity-50 flex items-center gap-1"
+                      >
+                        {autoLoading ? "가져오는 중..." : "⟳ 자동 가져오기"}
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <span className="text-xs">
